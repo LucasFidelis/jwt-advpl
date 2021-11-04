@@ -6,9 +6,9 @@ User Function JwtExample()
   Local oPayload := JsonObject():New()
   Local oPay := JsonObject():New()
 
-  oPayload["cUserId"] := __cUserId
+  oPayload["cUserId"] := '000000'
 
-  oJwt := Jwt():New(cKey)
+  oJwt := Jwt():New(cKey, 'SHA512')
 
   cToken := oJwt:Sign(oPayload)
 

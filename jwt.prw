@@ -1,5 +1,7 @@
 #Include "Protheus.ch"
 
+#Define ALGORITHMS {{'SHA256', 5}, {'SHA512', 7}}
+
 /*/{Protheus.doc} Jwt
   
   JsonWebToken for Protheus using ADVPL
@@ -8,9 +10,11 @@
   @since 02/11/2021
   @version P12
 /*/
-Class Jwt
+Class Jwt 
 
   Data cSecret
+  Data cAlgorithm
+  Data nAlgorithm
 
   Method New() Constructor
   Method Sign()
@@ -28,8 +32,22 @@ EndClass
   @param cSecret, String, Secret Key that will be used to generate the hash by HMAC
   @return Self
   /*/
-Method New(cSecret) Class Jwt
+Method New(cSecret, cAlgorithm) Class Jwt
+
+  Local nPos := 0
+  
+  Default cAlgorithm := 'SHA256'
+
+  nPos := AScan(ALGORITHMS, { |x| x[1] == cAlgorithm})
+  If nPos == 0
+    UserException('Algorithm not found')
+  EndIf
+
+  ::cAlgorithm := ALGORITHMS[nPos][1]
+  ::nAlgorithm := ALGORITHMS[nPos][2]
   ::cSecret := cSecret
+
+
 Return Self
 
 /*/{Protheus.doc} Sign
@@ -49,12 +67,12 @@ Method Sign(oPayload) class Jwt
 
   oHeader := JsonObject():New()
   oHeader["typ"] := "JWT"
-  oHeader["alg"] := "HS256"  
+  oHeader["alg"] := ::cAlgorithm 
 
   cHeader := StrTran(Encode64(oHeader:toJson()), "=", "")
   cPayload := StrTran(Encode64(oPayload:toJson()), "=", "")
 
-  cSign := StrTran(Encode64(HMAC(cHeader + '.' + cPayload, ::cSecret, 5)), "=", "")
+  cSign := StrTran(Encode64(HMAC(cHeader + '.' + cPayload, ::cSecret, ::nAlgorithm)), "=", "")
 
   cToken := cHeader+"."+cPayload+"."+cSign
 
@@ -80,7 +98,7 @@ Method Verify(cToken, oPay) class Jwt
   Local cPayload := aParts[2]
   Local cTokenValid
 
-  cSign := StrTran(Encode64(HMAC(cHeader + '.' + cPayload, ::cSecret, 5)), "=", "")
+  cSign := StrTran(Encode64(HMAC(cHeader + '.' + cPayload, ::cSecret, ::nAlgorithm)), "=", "")
   
   cTokenValid := cHeader+"."+cPayload+"."+cSign
 

@@ -7,6 +7,7 @@ An implementation of Json Web Tokens for Protheus using ADVPL.
 | Algorithm | MAC Algorithm |
 | :---: | :---: |
 | HS256 | HMAC using SHA-256 hash algorithm |
+| HS512 | HMAC using SHA-512 hash algorithm |
 
 ## Todo
 
